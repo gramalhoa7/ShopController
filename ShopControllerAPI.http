@@ -1,0 +1,6 @@
+@ShopControllerAPI_HostAddress = http://localhost:5085
+
+GET {{ShopControllerAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

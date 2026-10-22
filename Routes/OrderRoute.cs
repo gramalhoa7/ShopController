@@ -1,0 +1,108 @@
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using ShopControllerAPI.Data;
+using ShopControllerAPI.Models;
+
+namespace ShopControllerAPI.Routes;
+
+public static class OrderRoute
+{
+    private static OrdersResponse ToResponse(Orders o) => new(
+        o.Id, o.Number, o.Cashier, o.Total, o.Status, o.Date, o.Time, o.ItemOrd.Select(l => new OrderedItemsResponse(l.ItemId, l.ItemOrd.Name, l.Quantity, l.UnitPrice)).ToList(),
+        o.PaymantForm, o.NTF, o.Exist);
+ 
+    public static void OrderRoutes(this WebApplication app)
+    {
+        app.MapPost("Order", async (OrdersRequest req, DBContext context) =>
+        {
+            if (req.ItemOrd.Count == 0)
+                return Results.BadRequest("O pedido precisa ter pelo menos um item.");
+ 
+            var order = new Orders(req.Number, req.Cashier, 0m, req.Status, req.Date, req.Time, req.PaymantForm, req.NTF, req.Exist);
+ 
+            foreach (var itemOrd in req.ItemOrd)
+            {
+                if (itemOrd.Quantity <= 0)
+                    return Results.BadRequest("A quantidade deve ser maior que zero.");
+ 
+                var item = await context.Item.FirstOrDefaultAsync(i => i.Id == itemOrd.ItemId);
+ 
+                if (item == null)
+                    return Results.BadRequest($"O item {itemOrd.ItemId} não existe.");
+ 
+                if (item.Quant < itemOrd.Quantity)
+                    return Results.BadRequest($"Estoque insuficiente para {item.Name} (disponível: {item.Quant}).");
+ 
+                item.Quant -= itemOrd.Quantity;   // baixa o estoque
+ 
+                // Value = preço de venda (CustValue parece ser o custo). Ajuste se for o contrário.
+                order.ItemOrd.Add(new OrderedItems(item.Id, itemOrd.Quantity, item.Value));
+            }
+ 
+            order.Total = order.ItemOrd.Sum(l => l.Quantity * l.UnitPrice);
+ 
+            await context.AddAsync(order);
+            await context.SaveChangesAsync();   // salva pedido + linhas + estoque juntos
+ 
+            return Results.Created($"/Order/{order.Id}", order.Id);
+        });
+ 
+        app.MapGet("Order", async (DBContext context) =>
+        {
+            var orders = await context.Order
+                .Include(o => o.ItemOrd)
+                .ThenInclude(l => l.ItemOrd)       // sem o Include, Lines voltaria vazia
+                .ToListAsync();
+ 
+            return Results.Ok(orders.Select(ToResponse));
+        });
+ 
+        app.MapGet("Order/{Id:guid}", async (Guid id, DBContext context) =>
+        {
+            var order = await context.Order
+                .Include(o => o.ItemOrd)
+                .ThenInclude(l => l.ItemOrd)
+                .FirstOrDefaultAsync(o => o.Id == id);
+ 
+            if (order == null) return Results.NotFound();
+ 
+            return Results.Ok(ToResponse(order));
+        });
+ 
+        // O PUT altera só o cabeçalho do pedido. Mexer nos itens é outra operação.
+        app.MapPut("Order/{Id:guid}", async (Guid id, OrdersRequest req, DBContext context) =>
+        {
+            var order = await context.Order.FirstOrDefaultAsync(x => x.Id == id);
+ 
+            if (order == null) return Results.NotFound();
+ 
+            order.Number = req.Number;
+            order.Cashier = req.Cashier;
+            order.Status = req.Status;
+            order.Date = req.Date;
+            order.Time = req.Time;
+            order.PaymantForm = req.PaymantForm;
+            order.NTF = req.NTF;
+            order.Exist = req.Exist;
+ 
+            await context.SaveChangesAsync();
+ 
+            return Results.Ok(order.Id);
+        });
+ 
+        // Faltava o {Id:guid} na rota e o SaveChangesAsync
+        app.MapDelete("Order/{Id:guid}", async (Guid id, DBContext context) =>
+        {
+            var order = await context.Order.FirstOrDefaultAsync(x => x.Id == id);
+ 
+            if (order == null) return Results.NotFound();
+ 
+            order.Exist = false;
+ 
+            await context.SaveChangesAsync();
+ 
+            return Results.Ok(order.Id);
+        });
+    }
+}
