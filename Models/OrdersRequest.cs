@@ -3,14 +3,15 @@ namespace ShopControllerAPI.Models;
 public class OrdersRequest
 {
     public int Number { get; set; }
-    public int Cashier { get; set; }
-    public decimal Total { get; set; }
+    public Guid CashierId { get; set; }
+    public CashiersSessions CashierSession { get; set; }
     public string Status { get; set; }
     public DateTime Date { get; set; }
     public string Time { get; set; }
     public List<OrderedItems> ItemOrd { get; set; } = new();
+    public decimal PayValue { get; set; }
     public string PaymantForm { get; set; }
-    public string NTF { get; set; }
+    public string Ntf { get; set; }
     public bool Exist { get; set; }
 }
 
@@ -26,12 +27,12 @@ public record OrderedItemsResponse(Guid ItemId, string ItemName, int Quantity, d
 public record OrdersResponse(
     Guid Id,
     int Number,
-    int Cashier,
-    decimal Total,
+    Guid CashierId,
     string Status,
     DateTime Date,
     string Time,
     List<OrderedItemsResponse> ItemOrd,
+    decimal PayValue,
     string PaymantForm,
-    string NTF,
+    string Ntf,
     bool Exist);

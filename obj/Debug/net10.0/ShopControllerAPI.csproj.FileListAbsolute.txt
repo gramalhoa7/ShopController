@@ -163,3 +163,11 @@ C:\Users\T.T\Projects\ShopControllerAPI\obj\Debug\net10.0\refint\ShopControllerA
 C:\Users\T.T\Projects\ShopControllerAPI\obj\Debug\net10.0\ShopControllerAPI.pdb
 C:\Users\T.T\Projects\ShopControllerAPI\obj\Debug\net10.0\ShopControllerAPI.genruntimeconfig.cache
 C:\Users\T.T\Projects\ShopControllerAPI\obj\Debug\net10.0\ref\ShopControllerAPI.dll
+C:\Users\T.T\Projects\ShopControllerAPI\obj\Debug\net10.0\ShopControllerAPI.sourcelink.json
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Scalar.AspNetCore.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\T.T\Projects\ShopControllerAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll

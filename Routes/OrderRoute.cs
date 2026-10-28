@@ -9,17 +9,18 @@ namespace ShopControllerAPI.Routes;
 public static class OrderRoute
 {
     private static OrdersResponse ToResponse(Orders o) => new(
-        o.Id, o.Number, o.Cashier, o.Total, o.Status, o.Date, o.Time, o.ItemOrd.Select(l => new OrderedItemsResponse(l.ItemId, l.ItemOrd.Name, l.Quantity, l.UnitPrice)).ToList(),
-        o.PaymantForm, o.NTF, o.Exist);
+        o.Id, o.Number, o.CashierId, o.Status, o.Date, o.Time, o.ItemOrd.Select(l => new OrderedItemsResponse(l.ItemId, l.ItemOrd.Name, l.Quantity, l.UnitPrice)).ToList(),
+        o.PayValue, o.PaymantForm, o.Ntf, o.Exist);
  
     public static void OrderRoutes(this WebApplication app)
     {
+        //após passar no caixa
         app.MapPost("Order", async (OrdersRequest req, DBContext context) =>
         {
             if (req.ItemOrd.Count == 0)
                 return Results.BadRequest("O pedido precisa ter pelo menos um item.");
  
-            var order = new Orders(req.Number, req.Cashier, 0m, req.Status, req.Date, req.Time, req.PaymantForm, req.NTF, req.Exist);
+            var order = new Orders(req.Number, req.CashierId, req.Status, req.Time, req.PayValue, req.PaymantForm, req.Ntf, req.Exist);
  
             foreach (var itemOrd in req.ItemOrd)
             {
@@ -39,8 +40,9 @@ public static class OrderRoute
                 // Value = preço de venda (CustValue parece ser o custo). Ajuste se for o contrário.
                 order.ItemOrd.Add(new OrderedItems(item.Id, itemOrd.Quantity, item.Value));
             }
- 
-            order.Total = order.ItemOrd.Sum(l => l.Quantity * l.UnitPrice);
+    
+            decimal Total;
+            Total = order.ItemOrd.Sum(l => l.Quantity * l.UnitPrice);
  
             await context.AddAsync(order);
             await context.SaveChangesAsync();   // salva pedido + linhas + estoque juntos
@@ -48,6 +50,7 @@ public static class OrderRoute
             return Results.Created($"/Order/{order.Id}", order.Id);
         });
  
+        //mostrar todos os pedidos
         app.MapGet("Order", async (DBContext context) =>
         {
             var orders = await context.Order
@@ -58,6 +61,7 @@ public static class OrderRoute
             return Results.Ok(orders.Select(ToResponse));
         });
  
+        //detalhes do pedido
         app.MapGet("Order/{Id:guid}", async (Guid id, DBContext context) =>
         {
             var order = await context.Order
@@ -78,12 +82,12 @@ public static class OrderRoute
             if (order == null) return Results.NotFound();
  
             order.Number = req.Number;
-            order.Cashier = req.Cashier;
+            order.CashierId = req.CashierId;
             order.Status = req.Status;
             order.Date = req.Date;
             order.Time = req.Time;
             order.PaymantForm = req.PaymantForm;
-            order.NTF = req.NTF;
+            order.Ntf = req.Ntf;
             order.Exist = req.Exist;
  
             await context.SaveChangesAsync();
