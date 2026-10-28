@@ -21,7 +21,7 @@ public class CashiersSessions
     public Employees Employee { get; set; } = null!;
 
     public DateTime Opened { get; set; }
-    public DateTime Closed { get; set; }
+    public DateTime? Closed { get; set; }
     public decimal OpeningAmount { get; set; }
     public decimal ClosingAmount { get; set; }
 }
