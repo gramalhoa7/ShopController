@@ -19,7 +19,7 @@ public class OrderedItems
 
     // Liga a linha ao item do estoque
     public Guid ItemId { get; set; }
-    public Items ItemOrd { get; set; } = null!;
+    public Items Item { get; set; } = null!;
 
     public int Quantity { get; set; }
 

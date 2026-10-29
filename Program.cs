@@ -1,7 +1,5 @@
 using ShopControllerAPI.Routes;
 using ShopControllerAPI.Data;
-using ShopControllerAPI;
-using System.Text;
 using Scalar.AspNetCore;
 using ShopControllerAPI.Models;
 using Microsoft.AspNetCore.Identity;
@@ -40,6 +38,7 @@ app.MapPost("/Logout", async(SignInManager<EmployeeAuth> signInManager, [FromBod
 app.InventoryRoutes();
 app.OrderRoutes();
 app.CashierRoutes();
+app.EmployeeRoutes();
 
 app.UseHttpsRedirection();
 

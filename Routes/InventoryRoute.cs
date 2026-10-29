@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using ShopControllerAPI.Data;
 using ShopControllerAPI.Models;
@@ -11,7 +10,8 @@ public static class InvetoryRoute
     {
         app.MapPost("Inventory", async (ItemsRequest req, DBContext context) =>
         {
-            var Item = new Items(req.Name, req.Type, req.Value, req.CustValue, req.BarCode, req.Quant, req.Operation, req.Date, req.Exist);
+            var Item = new Items(req.Name, req.Type, req.Value, req.CustValue, req.BarCode, req.Quant, req.Operation, req.Exist);
+
             await context.AddAsync(Item);
             await context.SaveChangesAsync();
         });

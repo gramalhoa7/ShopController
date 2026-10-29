@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.SignalR;
-
 namespace ShopControllerAPI.Models;
 
 public class Items
 {
-    public Items(string name, string type, decimal value, decimal custValue, string barCode, int quant, string operation, string date, bool exist)
+    public Items(string name, string type, decimal value, decimal custValue, string barCode, int quant, string operation, bool exist)
     {
         Name = name;
         Type = type;
@@ -13,7 +11,7 @@ public class Items
         BarCode = barCode;
         Quant = quant;
         Operation = operation;
-        Date = date;
+        Date = DateTime.UtcNow;
         Exist = exist;
 
         Id = Guid.NewGuid();
@@ -26,6 +24,6 @@ public class Items
     public string BarCode { get; set; }
     public int Quant { get; set; }
     public string Operation { get; set; }
-    public string Date { get; set; }
+    public DateTime Date { get; set; }
     public bool Exist { get; set; }
 }

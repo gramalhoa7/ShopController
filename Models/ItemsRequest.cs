@@ -9,6 +9,6 @@ public class ItemsRequest
     public string BarCode { get; set; }
     public int Quant { get; set; }
     public string Operation { get; set; }
-    public string Date { get; set; }
+    public DateTime Date { get; set; }
     public bool Exist { get; set; }
 }

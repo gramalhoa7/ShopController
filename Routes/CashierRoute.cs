@@ -54,7 +54,7 @@ public static class CashierRoute
             
             cashierSession.Closed = DateTime.UtcNow;
             var cashSales = await context.OrderedItems
-                .Where(l => l.Order.CashierId == cashierSession.Id
+                .Where(l => l.Order.CashierSessionId == cashierSession.Id
                     && l.Order.Exist
                     && l.Order.PaymantForm == "Dinheiro")
                     .SumAsync(l => l.Quantity * l.UnitPrice);

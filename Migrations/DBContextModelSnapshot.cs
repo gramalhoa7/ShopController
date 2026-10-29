@@ -181,7 +181,7 @@ namespace ShopControllerAPI.Migrations
                     b.Property<Guid>("CashierId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("Closed")
+                    b.Property<DateTime?>("Closed")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("ClosingAmount")
@@ -308,9 +308,8 @@ namespace ShopControllerAPI.Migrations
                     b.Property<decimal>("CustValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Exist")
                         .HasColumnType("bit");
@@ -347,9 +346,6 @@ namespace ShopControllerAPI.Migrations
                     b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ItemOrdId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
@@ -361,7 +357,7 @@ namespace ShopControllerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemOrdId");
+                    b.HasIndex("ItemId");
 
                     b.HasIndex("OrderId");
 
@@ -374,7 +370,7 @@ namespace ShopControllerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CashierId")
+                    b.Property<Guid>("CashierSessionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Date")
@@ -482,26 +478,26 @@ namespace ShopControllerAPI.Migrations
 
             modelBuilder.Entity("ShopControllerAPI.Models.OrderedItems", b =>
                 {
-                    b.HasOne("ShopControllerAPI.Models.Items", "ItemOrd")
+                    b.HasOne("ShopControllerAPI.Models.Items", "Item")
                         .WithMany()
-                        .HasForeignKey("ItemOrdId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ShopControllerAPI.Models.Orders", "Order")
-                        .WithMany("ItemOrd")
+                        .WithMany("Item")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ItemOrd");
+                    b.Navigation("Item");
 
                     b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ShopControllerAPI.Models.Orders", b =>
                 {
-                    b.Navigation("ItemOrd");
+                    b.Navigation("Item");
                 });
 #pragma warning restore 612, 618
         }

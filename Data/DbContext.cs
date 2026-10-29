@@ -1,7 +1,5 @@
-using ShopControllerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using ShopControllerAPI.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ShopControllerAPI.Data;

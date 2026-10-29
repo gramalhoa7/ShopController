@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using ShopControllerAPI.Data;
 using ShopControllerAPI.Models;
@@ -9,7 +7,7 @@ namespace ShopControllerAPI.Routes;
 public static class OrderRoute
 {
     private static OrdersResponse ToResponse(Orders o) => new(
-        o.Id, o.Number, o.CashierId, o.Status, o.Date, o.Time, o.ItemOrd.Select(l => new OrderedItemsResponse(l.ItemId, l.ItemOrd.Name, l.Quantity, l.UnitPrice)).ToList(),
+        o.Id, o.Number, o.CashierSessionId, o.Status, o.Date, o.Item.Select(l => new OrderedItemsResponse(l.ItemId, l.Item.Name, l.Quantity, l.UnitPrice)).ToList(),
         o.PayValue, o.PaymantForm, o.Ntf, o.Exist);
  
     public static void OrderRoutes(this WebApplication app)
@@ -17,12 +15,12 @@ public static class OrderRoute
         //após passar no caixa
         app.MapPost("Order", async (OrdersRequest req, DBContext context) =>
         {
-            if (req.ItemOrd.Count == 0)
+            if (req.Item.Count == 0)
                 return Results.BadRequest("O pedido precisa ter pelo menos um item.");
  
-            var order = new Orders(req.Number, req.CashierId, req.Status, req.Time, req.PayValue, req.PaymantForm, req.Ntf, req.Exist);
+            var order = new Orders(req.Number, req.CashierSessionId, req.Status, req.PayValue, req.PaymantForm, req.Ntf, req.Exist);
  
-            foreach (var itemOrd in req.ItemOrd)
+            foreach (var itemOrd in req.Item)
             {
                 if (itemOrd.Quantity <= 0)
                     return Results.BadRequest("A quantidade deve ser maior que zero.");
@@ -38,11 +36,11 @@ public static class OrderRoute
                 item.Quant -= itemOrd.Quantity;   // baixa o estoque
  
                 // Value = preço de venda (CustValue parece ser o custo). Ajuste se for o contrário.
-                order.ItemOrd.Add(new OrderedItems(item.Id, itemOrd.Quantity, item.Value));
+                order.Item.Add(new OrderedItems(item.Id, itemOrd.Quantity, item.Value));
             }
     
             decimal Total;
-            Total = order.ItemOrd.Sum(l => l.Quantity * l.UnitPrice);
+            Total = order.Item.Sum(l => l.Quantity * l.UnitPrice);
  
             await context.AddAsync(order);
             await context.SaveChangesAsync();   // salva pedido + linhas + estoque juntos
@@ -54,8 +52,8 @@ public static class OrderRoute
         app.MapGet("Order", async (DBContext context) =>
         {
             var orders = await context.Order
-                .Include(o => o.ItemOrd)
-                .ThenInclude(l => l.ItemOrd)       // sem o Include, Lines voltaria vazia
+                .Include(o => o.Item)
+                .ThenInclude(l => l.Item)       // sem o Include, Lines voltaria vazia
                 .ToListAsync();
  
             return Results.Ok(orders.Select(ToResponse));
@@ -65,8 +63,8 @@ public static class OrderRoute
         app.MapGet("Order/{Id:guid}", async (Guid id, DBContext context) =>
         {
             var order = await context.Order
-                .Include(o => o.ItemOrd)
-                .ThenInclude(l => l.ItemOrd)
+                .Include(o => o.Item)
+                .ThenInclude(l => l.Item)
                 .FirstOrDefaultAsync(o => o.Id == id);
  
             if (order == null) return Results.NotFound();
@@ -82,10 +80,9 @@ public static class OrderRoute
             if (order == null) return Results.NotFound();
  
             order.Number = req.Number;
-            order.CashierId = req.CashierId;
+            order.CashierSessionId = req.CashierSessionId;
             order.Status = req.Status;
-            order.Date = req.Date;
-            order.Time = req.Time;
+            order.PayValue = req.PayValue;
             order.PaymantForm = req.PaymantForm;
             order.Ntf = req.Ntf;
             order.Exist = req.Exist;
