@@ -15,10 +15,16 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<DBContext>();
 
-builder.Services.AddIdentityApiEndpoints<EmployeeAuth>()
+builder.Services.AddIdentityApiEndpoints<Employees>()
+    .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<DBContext>();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -28,8 +34,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //RequireAuthorization()
-app.MapIdentityApi<EmployeeAuth>();
-app.MapPost("/Logout", async(SignInManager<EmployeeAuth> signInManager, [FromBody] object empty) =>
+app.MapIdentityApi<Employees>();
+app.MapPost("/Logout", async(SignInManager<Employees> signInManager, [FromBody] object empty) =>
 {
     await signInManager.SignOutAsync();
     return Results.Ok();
@@ -40,7 +46,16 @@ app.OrderRoutes();
 app.CashierRoutes();
 app.EmployeeRoutes();
 
-app.UseHttpsRedirection();
+//roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    foreach (var role in new[] {"Adm", "Manager", "Cashier"})
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole<Guid>(role));
+    }
+}
 
 app.Run();
-

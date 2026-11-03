@@ -46,7 +46,7 @@ public static class OrderRoute
             await context.SaveChangesAsync();   // salva pedido + linhas + estoque juntos
  
             return Results.Created($"/Order/{order.Id}", order.Id);
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager", "Cashier"));
  
         //mostrar todos os pedidos
         app.MapGet("Order", async (DBContext context) =>
@@ -57,7 +57,7 @@ public static class OrderRoute
                 .ToListAsync();
  
             return Results.Ok(orders.Select(ToResponse));
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager", "Cashier"));
  
         //detalhes do pedido
         app.MapGet("Order/{Id:guid}", async (Guid id, DBContext context) =>
@@ -70,7 +70,7 @@ public static class OrderRoute
             if (order == null) return Results.NotFound();
  
             return Results.Ok(ToResponse(order));
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager", "Cashier"));
  
         // O PUT altera só o cabeçalho do pedido. Mexer nos itens é outra operação.
         app.MapPut("Order/{Id:guid}", async (Guid id, OrdersRequest req, DBContext context) =>
@@ -90,7 +90,7 @@ public static class OrderRoute
             await context.SaveChangesAsync();
  
             return Results.Ok(order.Id);
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager"));
  
         // Faltava o {Id:guid} na rota e o SaveChangesAsync
         app.MapDelete("Order/{Id:guid}", async (Guid id, DBContext context) =>
@@ -104,6 +104,6 @@ public static class OrderRoute
             await context.SaveChangesAsync();
  
             return Results.Ok(order.Id);
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager"));
     }
 }

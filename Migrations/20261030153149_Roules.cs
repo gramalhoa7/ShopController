@@ -5,7 +5,7 @@
 namespace ShopControllerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class FixOrderedItems : Migration
+    public partial class Roules : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

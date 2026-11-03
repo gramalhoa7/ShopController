@@ -14,13 +14,13 @@ public static class InvetoryRoute
 
             await context.AddAsync(Item);
             await context.SaveChangesAsync();
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager"));
 
         app.MapGet("Inventory", async (DBContext context) =>
         {
             var item = await context.Item.ToListAsync();
             return Results.Ok(item);
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager", "Cashier"));
 
         app.MapPut("Inventory/{Id:guid}", async (Guid id, ItemsRequest req, DBContext context) =>
         {
@@ -38,7 +38,7 @@ public static class InvetoryRoute
             await context.SaveChangesAsync();
             
             return Results.Ok(item); 
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager"));
 
         app.MapDelete("Inventory/{Id:guid}", async (Guid id, DBContext context) =>
         {
@@ -51,6 +51,6 @@ public static class InvetoryRoute
             await context.SaveChangesAsync();
 
             return Results.Ok(item);
-        });
+        }).RequireAuthorization(o => o.RequireRole("Adm", "Manager"));
     }
 }
